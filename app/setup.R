@@ -7,7 +7,7 @@ install.packages("DBI")
 install.packages("rlang")
 install.packages("shinyjs")
 install.packages("tidyr")
-
+install.packages("shinyWidgets")
 
 library("shiny")
 library("shinydashboard")
@@ -18,3 +18,4 @@ library("DBI")
 library("rlang")
 library("shinyjs")
 library("tidyr")
+library("shinyWidgets")
