@@ -1,7 +1,6 @@
 source("modules/welcomePage.R")
 source("modules/trainMe.R")
 source("modules/viewPast.R")
-source("modules/appendDB.R")
 
 db <- dbPool(RSQLite::SQLite(), dbname = "workshop.db")
 
