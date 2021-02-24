@@ -3,6 +3,11 @@ trainMeUI <- function(id) {
   tagList(
     h2("Training Questions"),
     h4("Assess the existence of each symptom in the patient where 1 - Low and 7 - High"),
+    box(title = "Your Info", width = 20, solidHeader = TRUE, status = "primary",
+        numericInput(ns("rater"), "Rater ID", NULL),
+        radioButtons(ns("lang"), "Language", inline=TRUE,
+                     choices = list("English" = 1, "French" = 2, "Italian" = 3))
+    ),
     box(title = "Positive", width = 20, solidHeader = TRUE, status = "primary",
         radioButtons(ns("q1"), "Delusions", inline=TRUE,
                      choices = list("1" = 1, "2" = 2, "3" = 3, "4" = 4,
@@ -135,8 +140,12 @@ trainMeUI <- function(id) {
  )
 }
 
-trainMe <- function(input, output, session) {
+trainMe <- function(input, output, session, pool) {
   
+  ncol <- pool %>% tbl("values") %>% as.data.frame %>% ncol()
+  entryValues <- data.frame(matrix(NA, 1, ncol))
+  colnames(entryValues) <- pool %>% tbl("values") %>% as.data.frame %>% colnames()
+
   outputAnswers <- function(bool, range) {
     if (bool) {
       return(renderText({"Correct!"}))
@@ -146,41 +155,23 @@ trainMe <- function(input, output, session) {
   }
   
  observeEvent(input$submit, {
-   nam <- paste0("q", seq(1,30))
-   values <- as.numeric(unlist(reactiveValuesToList(input)[nam]))
-   expert <- c(4, 2, 5, 1, 2, 4, 2, 5, 4, 4, 3, 3,
-               4, 2, 3, 4, 5, 3, 3, 3, 4, 3, 3, 1,
-               2, 2, 3, 1, 3, 1)
    
-   marks <- rep(NA, length(values))
-   bool <- rep(NA, length(values))
-   ranges <- list()
-   for (i in 1:length(values)) {
-     if (expert[i] == 1) {
-       rang <- seq(expert[i], expert[i]+1)
-     } else if (expert[i] == 7) {
-       rang <- seq(expert[i]-1, expert[i])
-     } else {
-     rang <- seq(expert[i]-1, expert[i]+1)
-     }
-     ranges <- append(ranges, list(rang))
-     if (values[i] %in% rang) {
-       marks[i] <- 1
-       bool[i] <- TRUE
-     } else {
-       marks[i] <- 0
-       bool[i] <- FALSE
-     }
-   }
+   if (is.na(input$rater)) {
+     showModal(modalDialog(
+       title = "Input Error: Empty",
+       "Please enter a rater id",
+       easyClose = TRUE, footer = NULL
+     ))
+   } else if (!is.integer(input$rater)){
+     showModal(modalDialog(
+       title = "Input Error: Incorrect Input Type",
+       "Please enter rater id as integer",
+       easyClose = TRUE, footer = NULL
+     ))
+   } else {
+
+   result <- findResult()
    
-   
-   pos <- sum(marks[1:7])
-   neg <- sum(marks[8:14])
-   gen <- sum(marks[15:30])
-   result <- "FAIL"
-   if (pos >= 5 & neg >= 5 & gen >= 10) {
-     result <- "PASS"
-   }
    showModal(modalDialog(
      title = paste("Result: ", result),
      paste("Positive: ", pos, " out of 7","\n", "Negative: ", neg, " out of 7\n",
@@ -219,11 +210,83 @@ trainMe <- function(input, output, session) {
      output$a28 <- outputAnswers(bool[28], ranges[28])
      output$a29 <- outputAnswers(bool[29], ranges[29])
      output$a30 <- outputAnswers(bool[30], ranges[30])
-   })
+   }) 
+   }
+   
  })
+
+ 
+  findResult <- function() {
+    nam <- paste0("q", seq(1,30))
+    values <- as.numeric(unlist(reactiveValuesToList(input)[nam]))
+    expert <- c(4, 2, 5, 1, 2, 4, 2, 5, 4, 4, 3, 3,
+                4, 2, 3, 4, 5, 3, 3, 3, 4, 3, 3, 1,
+                2, 2, 3, 1, 3, 1)
+    
+    marks <- rep(NA, length(values))
+    bool <- rep(NA, length(values))
+    ranges <- list()
+    for (i in 1:length(values)) {
+      if (expert[i] == 1) {
+        rang <- seq(expert[i], expert[i]+1)
+      } else if (expert[i] == 7) {
+        rang <- seq(expert[i]-1, expert[i])
+      } else {
+        rang <- seq(expert[i]-1, expert[i]+1)
+      }
+      ranges <- append(ranges, list(rang))
+      if (values[i] %in% rang) {
+        marks[i] <- 1
+        bool[i] <- TRUE
+      } else {
+        marks[i] <- 0
+        bool[i] <- FALSE
+      }
+    }
+    
+    
+    pos <- sum(marks[1:7])
+    neg <- sum(marks[8:14])
+    gen <- sum(marks[15:30])
+    result <- "FAIL"
+    if (pos >= 5 & neg >= 5 & gen >= 10) {
+      result <- "PASS"
+    }
+    
+    return(result)
+  } 
+ 
   
   observeEvent(input$save, {
-    
+    tryCatch(
+      {
+        values <- findResult()
+        entryValues[1] <- as.integer(input$rater)
+        if (input$lang == "1") {
+          entryValues[2] <- "E"
+        } else if (input$lang == "2") {
+          entryValues[2] <- "F"
+        } else if (input$lang == "3") {
+          entryValues[2] <- "I"
+        }
+        
+        entryValues[3:length(entryValues)] <- values
+        
+        
+        dbAppendTable(pool, "values", entryValues)
+        
+        showModal(modalDialog(
+          title = "Success! Saved to the database!",
+          easyClose = TRUE, footer = NULL
+        ))
+      },
+      error=function(e) {
+        showModal(modalDialog(
+          title = "UNIQUE contraint failed",
+          str(e),
+          easyClose = TRUE, footer = NULL
+        ))
+      })
   })
    
 }
