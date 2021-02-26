@@ -1,3 +1,16 @@
+library("shiny")
+library("shinydashboard")
+library("dplyr")
+library("dbplyr")
+library("pool")
+library("DBI")
+library("rlang")
+library("shinyjs")
+library("tidyr")
+library("shinyWidgets")
+library("RSQLite")
+
+
 source("modules/welcomePage.R")
 source("modules/trainMe.R")
 source("modules/viewPast.R")
