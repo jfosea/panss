@@ -40,7 +40,7 @@ Once R and Rstudio has been downloaded and installed, do the following:
 
     ![Open app](images/5-app.JPG)
     
-     ![Run app](images/6-run-app.JPG)
+    ![Run app](images/6-run-app.JPG)
      
 4. A new window should open up containing the web program.
 
