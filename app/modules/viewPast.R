@@ -1,8 +1,10 @@
 viewPastUI <- function(id) {
   ns <- NS(id)
   tagList(h2("Look at past results"),
-          box(tableOutput(ns("res")), width = 12)
+          box(title = "Workshop Results", width = 20, solidHeader = TRUE, status = "primary",
+              tableOutput(ns("res"))
           )
+        )
 }
 
 viewPast <- function(input, output, session, pool) {
@@ -53,4 +55,5 @@ viewPast <- function(input, output, session, pool) {
     final <- data.frame(User=fdata["RATER"], Language=fdata["LANG"], Result=result)
     as_tibble(final)
  }) 
+  
 }
