@@ -1,7 +1,7 @@
 welcomePageUI <- function(id) {
   ns <- NS(id)
   tagList(h2("Welcome!"),
-          h4("This page is developed by Statistical Conulting Service
+          h4("This page is developed by Statistical Consulting Service
              Department of Mathematics and Statistics at the University of Calgary."),
           h4("We were appointed by the College of Physicians and Surgeons of Alberta
              to create an analysis system to train physicians on how to use the 
