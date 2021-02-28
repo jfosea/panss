@@ -20,7 +20,7 @@ Once R and Rstudio has been downloaded and installed, do the following:
 
 1. Download a .zip of this project by clicking the green button `Code` on this page and click `Download ZIP`.
 
-  ![Download](images/0-download.JPG)
+    ![Download](images/0-download.JPG)
 
 2. Extract the zip folder using your system instructions and open the zip folder.
 
@@ -40,7 +40,7 @@ Once R and Rstudio has been downloaded and installed, do the following:
 
     ![Open app](images/5-app.JPG)
     
-     ![Run app](images/6-run-app.JPG)
+    ![Run app](images/6-run-app.JPG)
      
 4. A new window should open up containing the web program.
 
